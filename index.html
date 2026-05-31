@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Curso IA — Iván Lafuente</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --negro: #080808;
+    --blanco: #F5F2EC;
+    --naranja: #FF5C00;
+    --naranja-suave: #FF5C0015;
+    --gris: #1A1A1A;
+    --gris-texto: #888;
+    --borde: #222;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--negro);
+    color: var(--blanco);
+    font-family: 'Lora', serif;
+    overflow-x: hidden;
+  }
+
+  /* NOISE OVERLAY */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.6;
+  }
+
+  /* NAV */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    padding: 20px 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 100;
+    background: linear-gradient(to bottom, rgba(8,8,8,0.95), transparent);
+  }
+
+  .nav-logo {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 14px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--blanco);
+    text-decoration: none;
+  }
+
+  .nav-logo span { color: var(--naranja); }
+
+  .nav-cta {
+    background: var(--naranja);
+    color: #000;
+    padding: 10px 22px;
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 12px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    text-decoration: none;
+    transition: all 0.2s;
+  }
+
+  .nav-cta:hover { background: var(--blanco); }
+
+  /* HERO */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    padding: 120px 40px 80px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero-bg {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse 60% 60% at 70% 50%, #FF5C0018 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .hero-grid {
+    position: absolute;
+    inset: 0;
+    background-image: 
+      linear-gradient(rgba(255,92,0,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,92,0,0.04) 1px, transparent 1px);
+    background-size: 60px 60px;
+    pointer-events: none;
+  }
+
+  .hero-content {
+    max-width: 900px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
+  }
+
+  .hero-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    border: 1px solid var(--naranja);
+    color: var(--naranja);
+    padding: 6px 14px;
+    font-family: 'Syne', sans-serif;
+    font-size: 10px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-bottom: 32px;
+    animation: fadeUp 0.8s ease both;
+  }
+
+  .hero-tag::before {
+    content: '';
+    width: 6px; height: 6px;
+    background: var(--naranja);
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(0.8); }
+  }
+
+  .hero h1 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: clamp(42px, 8vw, 88px);
+    line-height: 0.95;
+    letter-spacing: -2px;
+    margin-bottom: 28px;
+    animation: fadeUp 0.8s ease 0.1s both;
+  }
+
+  .hero h1 em {
+    font-style: italic;
+    font-family: 'Lora', serif;
+    font-weight: 400;
+    color: var(--naranja);
+  }
+
+  .hero-sub {
+    font-size: 17px;
+    color: var(--gris-texto);
+    line-height: 1.7;
+    max-width: 520px;
+    margin-bottom: 48px;
+    animation: fadeUp 0.8s ease 0.2s both;
+  }
+
+  .hero-sub strong { color: var(--blanco); font-weight: 600; }
+
+  .hero-actions {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    animation: fadeUp 0.8s ease 0.3s both;
+  }
+
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--naranja);
+    color: #000;
+    padding: 16px 32px;
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 1px;
+    text-decoration: none;
+    text-transform: uppercase;
+    transition: all 0.2s;
+  }
+
+  .btn-primary:hover {
+    background: var(--blanco);
+    transform: translateY(-2px);
+  }
+
+  .btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    border: 1px solid var(--borde);
+    color: var(--gris-texto);
+    padding: 16px 32px;
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 1px;
+    text-decoration: none;
+    text-transform: uppercase;
+    transition: all 0.2s;
+  }
+
+  .btn-secondary:hover {
+    border-color: var(--blanco);
+    color: var(--blanco);
+  }
+
+  /* STATS */
+  .stats {
+    padding: 60px 40px;
+    border-top: 1px solid var(--borde);
+    border-bottom: 1px solid var(--borde);
+    position: relative;
+    z-index: 1;
+  }
+
+  .stats-inner {
+    max-width: 900px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 40px;
+  }
+
+  .stat-item { text-align: center; }
+
+  .stat-num {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 36px;
+    color: var(--naranja);
+    display: block;
+    margin-bottom: 4px;
+  }
+
+  .stat-label {
+    font-size: 11px;
+    color: var(--gris-texto);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    font-family: 'Syne', sans-serif;
+  }
+
+  /* NIVELES */
+  .niveles {
+    padding: 100px 40px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .section-header {
+    max-width: 900px;
+    margin: 0 auto 64px;
+  }
+
+  .section-tag {
+    font-family: 'Syne', sans-serif;
+    font-size: 10px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--naranja);
+    margin-bottom: 16px;
+    display: block;
+  }
+
+  .section-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: clamp(28px, 5vw, 48px);
+    line-height: 1.1;
+  }
+
+  .section-title em {
+    font-family: 'Lora', serif;
+    font-style: italic;
+    font-weight: 400;
+    color: var(--gris-texto);
+  }
+
+  .niveles-grid {
+    max-width: 900px;
+    margin: 0 auto;
+    display: grid;
+    gap: 2px;
+  }
+
+  .nivel-card {
+    background: var(--gris);
+    padding: 40px 48px;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 32px;
+    align-items: start;
+    border-left: 3px solid transparent;
+    transition: all 0.3s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .nivel-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--naranja-suave);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .nivel-card:hover {
+    border-left-color: var(--naranja);
+    transform: translateX(4px);
+  }
+
+  .nivel-card:hover::before { opacity: 1; }
+
+  .nivel-card.featured {
+    border-left-color: var(--naranja);
+    background: #121212;
+  }
+
+  .nivel-num {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 48px;
+    color: var(--borde);
+    line-height: 1;
+    transition: color 0.3s;
+  }
+
+  .nivel-card:hover .nivel-num,
+  .nivel-card.featured .nivel-num { color: var(--naranja); }
+
+  .nivel-info { position: relative; z-index: 1; }
+
+  .nivel-badge {
+    display: inline-block;
+    font-family: 'Syne', sans-serif;
+    font-size: 9px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    border: 1px solid var(--borde);
+    padding: 3px 10px;
+    color: var(--gris-texto);
+    margin-bottom: 12px;
+  }
+
+  .nivel-card.featured .nivel-badge {
+    border-color: var(--naranja);
+    color: var(--naranja);
+  }
+
+  .nivel-titulo {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 20px;
+    margin-bottom: 10px;
+    line-height: 1.2;
+  }
+
+  .nivel-desc {
+    color: var(--gris-texto);
+    font-size: 14px;
+    line-height: 1.7;
+    margin-bottom: 20px;
+  }
+
+  .nivel-items {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .nivel-items li {
+    font-size: 13px;
+    color: #777;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .nivel-items li::before {
+    content: '→';
+    color: var(--naranja);
+    font-size: 11px;
+    flex-shrink: 0;
+  }
+
+  .nivel-precio {
+    text-align: right;
+    position: relative;
+    z-index: 1;
+    flex-shrink: 0;
+  }
+
+  .precio-num {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 22px;
+    color: var(--blanco);
+    display: block;
+    white-space: nowrap;
+  }
+
+  .precio-moneda {
+    font-family: 'Syne', sans-serif;
+    font-size: 10px;
+    color: var(--gris-texto);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  .precio-gratis {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 18px;
+    color: var(--naranja);
+  }
+
+  /* PARA QUIEN */
+  .para-quien {
+    padding: 100px 40px;
+    border-top: 1px solid var(--borde);
+    position: relative;
+    z-index: 1;
+    background: #050505;
+  }
+
+  .para-quien-inner {
+    max-width: 900px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
+    align-items: start;
+  }
+
+  .check-list { list-style: none; display: flex; flex-direction: column; gap: 16px; margin-top: 32px; }
+
+  .check-list li {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    font-size: 15px;
+    color: #AAA;
+    line-height: 1.5;
+  }
+
+  .check-icon {
+    width: 20px; height: 20px;
+    background: var(--naranja-suave);
+    border: 1px solid var(--naranja);
+    color: var(--naranja);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  /* CTA FINAL */
+  .cta-final {
+    padding: 120px 40px;
+    position: relative;
+    z-index: 1;
+    text-align: center;
+    overflow: hidden;
+  }
+
+  .cta-final::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse 50% 80% at 50% 50%, #FF5C0012 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .cta-final-inner { max-width: 600px; margin: 0 auto; position: relative; }
+
+  .cta-final h2 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: clamp(32px, 6vw, 56px);
+    line-height: 1.05;
+    margin-bottom: 20px;
+  }
+
+  .cta-final h2 em {
+    font-family: 'Lora', serif;
+    font-style: italic;
+    font-weight: 400;
+    color: var(--naranja);
+  }
+
+  .cta-final p {
+    color: var(--gris-texto);
+    font-size: 16px;
+    line-height: 1.7;
+    margin-bottom: 40px;
+  }
+
+  .whatsapp-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    background: #25D366;
+    color: #000;
+    padding: 18px 40px;
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    letter-spacing: 1px;
+    text-decoration: none;
+    text-transform: uppercase;
+    transition: all 0.3s;
+  }
+
+  .whatsapp-btn:hover {
+    background: var(--blanco);
+    transform: translateY(-3px);
+    box-shadow: 0 20px 40px rgba(37,211,102,0.2);
+  }
+
+  .whatsapp-icon {
+    width: 20px; height: 20px;
+    fill: #000;
+  }
+
+  /* FOOTER */
+  footer {
+    padding: 32px 40px;
+    border-top: 1px solid var(--borde);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+    z-index: 1;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+
+  .footer-logo {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 12px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--gris-texto);
+  }
+
+  .footer-logo span { color: var(--naranja); }
+
+  .footer-copy {
+    font-family: 'Syne', sans-serif;
+    font-size: 10px;
+    color: #444;
+    letter-spacing: 1px;
+  }
+
+  /* ANIMATIONS */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .fade-in {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.6s ease;
+  }
+
+  .fade-in.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* RESPONSIVE */
+  @media (max-width: 768px) {
+    nav { padding: 16px 20px; }
+    .hero { padding: 100px 20px 60px; }
+    .stats { padding: 40px 20px; }
+    .niveles { padding: 60px 20px; }
+    .nivel-card { grid-template-columns: 1fr; padding: 28px 24px; gap: 16px; }
+    .nivel-num { font-size: 32px; }
+    .nivel-precio { text-align: left; }
+    .para-quien { padding: 60px 20px; }
+    .para-quien-inner { grid-template-columns: 1fr; gap: 40px; }
+    .cta-final { padding: 80px 20px; }
+    footer { padding: 24px 20px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="#" class="nav-logo">Iván <span>Lafuente</span></a>
+  <a href="https://wa.me/595982790407?text=Hola%20Iván,%20quiero%20información%20sobre%20el%20Curso%20IA" class="nav-cta" target="_blank">Consultar</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-grid"></div>
+  <div class="hero-content">
+    <div class="hero-tag">Curso IA · Paraguay · 2026</div>
+    <h1>Aprendé a usar<br><em>Inteligencia<br>Artificial</em><br>para tu negocio</h1>
+    <p class="hero-sub">
+      Desde <strong>cero absoluto</strong> hasta construir tu propio agente de IA.<br>
+      Sin tecnicismos. Sin computadora cara. Con resultados reales desde el primer día.
+    </p>
+    <div class="hero-actions">
+      <a href="#niveles" class="btn-primary">Ver los niveles →</a>
+      <a href="https://wa.me/595982790407?text=Hola%20Iván,%20quiero%20información%20sobre%20el%20Curso%20IA" class="btn-secondary" target="_blank">Hablar con Iván</a>
+    </div>
+  </div>
+</section>
+
+<!-- STATS -->
+<section class="stats">
+  <div class="stats-inner">
+    <div class="stat-item fade-in">
+      <span class="stat-num">3</span>
+      <span class="stat-label">Niveles de curso</span>
+    </div>
+    <div class="stat-item fade-in">
+      <span class="stat-num">0</span>
+      <span class="stat-label">Experiencia requerida</span>
+    </div>
+    <div class="stat-item fade-in">
+      <span class="stat-num">100%</span>
+      <span class="stat-label">Casos reales</span>
+    </div>
+    <div class="stat-item fade-in">
+      <span class="stat-num">∞</span>
+      <span class="stat-label">Posibilidades</span>
+    </div>
+  </div>
+</section>
+
+<!-- NIVELES -->
+<section class="niveles" id="niveles">
+  <div class="section-header fade-in">
+    <span class="section-tag">El programa</span>
+    <h2 class="section-title">Tres niveles.<br><em>Un sistema completo.</em></h2>
+  </div>
+
+  <div class="niveles-grid">
+
+    <!-- NIVEL 1 -->
+    <div class="nivel-card fade-in">
+      <div class="nivel-num">01</div>
+      <div class="nivel-info">
+        <span class="nivel-badge">Nivel 1 · Inicio</span>
+        <h3 class="nivel-titulo">Conociendo Claude AI</h3>
+        <p class="nivel-desc">El punto de partida. Aprendés a usar la IA desde tu celular o computadora, sin instalar nada complicado. Creás proyectos, manejás tu negocio y empezás a comunicarte con la IA como un profesional.</p>
+        <ul class="nivel-items">
+          <li>Crear cuenta y configurar Claude AI</li>
+          <li>Proyectos con memoria para tu negocio</li>
+          <li>Generar contenido, planes y estrategias</li>
+          <li>Crear tu primera página web con IA</li>
+          <li>Sin instalaciones · Celular o PC</li>
+        </ul>
+      </div>
+      <div class="nivel-precio">
+        <span class="precio-num">250.000</span>
+        <span class="precio-moneda">Guaraníes</span>
+      </div>
+    </div>
+
+    <!-- NIVEL 2 -->
+    <div class="nivel-card featured fade-in">
+      <div class="nivel-num">02</div>
+      <div class="nivel-info">
+        <span class="nivel-badge">Nivel 2 · Intermedio</span>
+        <h3 class="nivel-titulo">Construyendo con Claude Code</h3>
+        <p class="nivel-desc">Para los que dominaron el Nivel 1. Instalás Claude Code en tu computadora y empezás a construir proyectos reales — automatizaciones, sistemas, herramientas para tu negocio.</p>
+        <ul class="nivel-items">
+          <li>Instalación y configuración profesional</li>
+          <li>Primer proyecto real funcionando</li>
+          <li>Automatizaciones para tu negocio</li>
+          <li>Memoria persistente entre sesiones</li>
+          <li>Requiere aprobar Nivel 1</li>
+        </ul>
+      </div>
+      <div class="nivel-precio">
+        <span class="precio-num">550.000</span>
+        <span class="precio-moneda">Guaraníes</span>
+      </div>
+    </div>
+
+    <!-- NIVEL 3 -->
+    <div class="nivel-card fade-in">
+      <div class="nivel-num">03</div>
+      <div class="nivel-info">
+        <span class="nivel-badge">Nivel 3 · Avanzado</span>
+        <h3 class="nivel-titulo">Tu primer Agente de IA</h3>
+        <p class="nivel-desc">El nivel que cambia todo. Construís un agente de IA que trabaja por vos — atiende clientes por WhatsApp, responde preguntas, agenda turnos, procesa pagos. 24/7, sin intervención humana.</p>
+        <ul class="nivel-items">
+          <li>Agente de WhatsApp para tu negocio</li>
+          <li>Atención automatizada 24/7</li>
+          <li>Integración con Airtable y Calendar</li>
+          <li>Sistema de ventas automático</li>
+          <li>Requiere aprobar Nivel 2</li>
+        </ul>
+      </div>
+      <div class="nivel-precio">
+        <span class="precio-num">2.500.000</span>
+        <span class="precio-moneda">Guaraníes</span>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- PARA QUIÉN -->
+<section class="para-quien">
+  <div class="para-quien-inner">
+    <div class="fade-in">
+      <span class="section-tag">Para quién es</span>
+      <h2 class="section-title">Este curso es<br><em>para vos</em></h2>
+      <ul class="check-list">
+        <li><span class="check-icon">✓</span>Emprendedor o dueño de negocio que quiere ahorrar tiempo</li>
+        <li><span class="check-icon">✓</span>No sabés programar y nunca usaste IA antes</li>
+        <li><span class="check-icon">✓</span>Querés automatizar tareas repetitivas de tu negocio</li>
+        <li><span class="check-icon">✓</span>Tenés ganas de aprender aunque tu computadora sea vieja</li>
+        <li><span class="check-icon">✓</span>Querés resultados reales, no teoría abstracta</li>
+      </ul>
+    </div>
+    <div class="fade-in">
+      <span class="section-tag">Por qué con Iván</span>
+      <h2 class="section-title">Aprendizaje<br><em>desde la práctica</em></h2>
+      <ul class="check-list">
+        <li><span class="check-icon">→</span>Todo lo que enseño lo construí yo mismo en mis propios negocios</li>
+        <li><span class="check-icon">→</span>1.500 horas de experiencia real condensadas en el curso</li>
+        <li><span class="check-icon">→</span>Ejemplos reales: agentes funcionando, páginas web deployadas</li>
+        <li><span class="check-icon">→</span>Cursos todos los domingos — presencial y seguimiento real</li>
+        <li><span class="check-icon">→</span>Si tu computadora no sirve, te lo digo antes de que gastes</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- CTA FINAL -->
+<section class="cta-final">
+  <div class="cta-final-inner">
+    <h2>¿Listo para<br><em>empezar?</em></h2>
+    <p>Escribime por WhatsApp y te cuento en qué nivel arrancás, cuándo es el próximo curso y qué necesitás tener.</p>
+    <a href="https://wa.me/595982790407?text=Hola%20Iván,%20quiero%20información%20sobre%20el%20Curso%20IA" class="whatsapp-btn" target="_blank">
+      <svg class="whatsapp-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+      </svg>
+      Escribir a Iván
+    </a>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">Iván <span>Lafuente</span> · Curso IA</div>
+  <div class="footer-copy">Paraguay · 2026 · +595 982 790 407</div>
+</footer>
+
+<script>
+  // Scroll animations
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry, i) => {
+      if (entry.isIntersecting) {
+        setTimeout(() => {
+          entry.target.classList.add('visible');
+        }, i * 80);
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1 });
+
+  document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+</script>
+
+</body>
+</html>
